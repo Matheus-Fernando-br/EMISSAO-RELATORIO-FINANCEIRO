@@ -47,3 +47,7 @@ A exportação usa `html2pdf.js` via CDN. Para uso sem internet, baixe a bibliot
 - `Genoma_Evento_simples_modelo.pdf`: modelo original para download.
 - `vercel.json`: configuração de hospedagem estática.
 - `start-local.sh`: servidor local simples.
+
+## Logo oficial
+
+O arquivo `logo-genoma-vertical2.webp` deve ficar na raiz do projeto, no mesmo nível do `index.html`, `styles.css` e `script.js`. O site usa essa mesma imagem no cabeçalho e no PDF gerado.
