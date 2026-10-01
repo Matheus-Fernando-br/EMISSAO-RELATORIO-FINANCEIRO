@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerador de Solicitação de Evento | Genoma</title>
+  <meta name="description" content="Preencha os dados e gere o formulário de solicitação e autorização de evento em PDF." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">⌁</span><span>GENOMA <small>SISTEMA DE ENSINO</small></span></div>
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar modo claro e escuro">☾ <span>Modo escuro</span></button>
+  </header>
+
+  <main class="app-shell">
+    <section class="intro">
+      <div>
+        <p class="eyebrow">FORMULÁRIO DIGITAL</p>
+        <h1>Solicitação e autorização de evento</h1>
+        <p>Preencha os dados abaixo e gere um PDF pronto para compartilhar ou arquivar.</p>
+      </div>
+      <div class="actions">
+        <a class="btn secondary" href="Genoma_Evento_simples_modelo.pdf" download>↓&nbsp; Baixar modelo</a>
+        <button class="btn primary" id="generatePdf" type="button">▣&nbsp; Gerar PDF</button>
+      </div>
+    </section>
+
+    <div class="layout">
+      <form id="eventForm" class="form-panel" autocomplete="off">
+        <div class="form-section">
+          <div class="section-heading"><span>01</span><div><h2>Identificação</h2><p>Quem solicita e quando o evento acontecerá.</p></div></div>
+          <div class="field-grid two">
+            <label> Sede / unidade <input data-key="sede" placeholder="Ex.: Unidade Centro" /></label>
+            <label> Gestor responsável <input data-key="gestor" placeholder="Nome completo" /></label>
+            <label> Data da solicitação <input data-key="dataSolicitacao" type="date" /></label>
+            <label> Data prevista do evento <input data-key="dataEvento" type="date" /></label>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-heading"><span>02</span><div><h2>Dados do evento</h2><p>Informações essenciais para planejamento.</p></div></div>
+          <label> Nome do evento <input data-key="nomeEvento" placeholder="Digite o nome do evento" /></label>
+          <fieldset><legend>Tipo de evento</legend><div class="checks"> 
+            <label><input data-key="tipo" value="Pedagógico" type="checkbox" /> Pedagógico</label><label><input data-key="tipo" value="Institucional" type="checkbox" /> Institucional</label><label><input data-key="tipo" value="Comemorativo" type="checkbox" /> Comemorativo</label><label><input data-key="tipo" value="Esportivo" type="checkbox" /> Esportivo</label><label><input data-key="tipo" value="Cultural" type="checkbox" /> Cultural</label><label><input data-key="tipo" value="Outro" type="checkbox" /> Outro</label>
+          </div></fieldset>
+          <fieldset><legend>Público-alvo</legend><div class="checks"><label><input data-key="publico" value="Alunos" type="checkbox" /> Alunos</label><label><input data-key="publico" value="Famílias" type="checkbox" /> Famílias</label><label><input data-key="publico" value="Colaboradores" type="checkbox" /> Colaboradores</label><label><input data-key="publico" value="Comunidade" type="checkbox" /> Comunidade</label><label><input data-key="publico" value="Outro" type="checkbox" /> Outro</label></div></fieldset>
+          <label> Local de realização <input data-key="local" placeholder="Endereço ou espaço do evento" /></label>
+          <div class="field-grid three"><label> Horário de início <input data-key="inicio" type="time" /></label><label> Término <input data-key="termino" type="time" /></label><label> Participantes estimados <input data-key="participantes" type="number" min="0" placeholder="0" /></label></div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-heading"><span>03</span><div><h2>Justificativa e programação</h2><p>Explique o propósito e como o evento será realizado.</p></div></div>
+          <label> Motivo / justificativa do evento <textarea data-key="motivo" placeholder="Descreva a motivação..."></textarea></label>
+          <label> Objetivo / resultado esperado <textarea data-key="objetivo" placeholder="Qual resultado pretende alcançar?"></textarea></label>
+          <label> Descrição do evento e programação prevista <textarea data-key="programacao" class="large" placeholder="Informe a programação, horários e atividades..."></textarea></label>
+        </div>
+
+        <div class="form-section">
+          <div class="section-heading"><span>04</span><div><h2>Estrutura e custos</h2><p>Materiais, fornecedores e orçamento estimado.</p></div></div>
+          <label> Estrutura, materiais, serviços e demais necessidades <textarea data-key="estrutura" class="large"></textarea></label>
+          <label> Fornecedores / prestadores previstos <textarea data-key="fornecedores"></textarea></label>
+          <label> Valor estimado total do evento <input data-key="valor" placeholder="R$ 0,00" /></label>
+          <fieldset><legend>Orçamento / documentos anexos</legend><div class="checks"><label><input data-key="anexos" name="anexos" value="Sim" type="radio" /> Sim</label><label><input data-key="anexos" name="anexos" value="Não" type="radio" /> Não</label><label><input data-key="anexos" name="anexos" value="Não se aplica" type="radio" /> Não se aplica</label></div></fieldset>
+        </div>
+
+        <div class="form-section">
+          <div class="section-heading"><span>05</span><div><h2>Solicitação e autorização</h2><p>Registre a decisão e observações finais.</p></div></div>
+          <label> Data da assinatura do solicitante <input data-key="dataAssinatura" type="date" /></label>
+          <fieldset><legend>Status da autorização</legend><div class="checks"><label><input data-key="status" name="status" value="AUTORIZADO" type="radio" /> Autorizado</label><label><input data-key="status" name="status" value="AUTORIZADO COM RESSALVAS" type="radio" /> Com ressalvas</label><label><input data-key="status" name="status" value="NÃO AUTORIZADO" type="radio" /> Não autorizado</label></div></fieldset>
+          <label> Ressalvas / observações <textarea data-key="ressalvas" class="large"></textarea></label>
+        </div>
+        <button class="btn primary full" id="generatePdfBottom" type="button">Gerar PDF preenchido</button>
+      </form>
+
+      <aside class="preview-panel"><div class="preview-header"><div><strong>Prévia do documento</strong><span>Atualizada em tempo real</span></div><span class="live-dot">● AO VIVO</span></div><div class="preview-wrap"><div id="pdfDocument" class="pdf-document"></div></div></aside>
+    </div>
+  </main>
+</body>
+</html>
