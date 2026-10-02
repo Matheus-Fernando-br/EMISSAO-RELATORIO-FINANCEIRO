@@ -1,22 +1,132 @@
-const form = document.querySelector('#eventForm');
-const doc = document.querySelector('#pdfDocument');
-const value = key => { const nodes=[...document.querySelectorAll(`[data-key="${key}"]`)]; if(!nodes.length)return ''; if(nodes[0].type==='checkbox')return nodes.filter(n=>n.checked).map(n=>n.value).join('  ·  '); const checked=nodes.find(n=>n.checked); return checked?checked.value:(nodes[0].value||''); };
-const formatDate = v => { if(!v)return ''; const [y,m,d]=v.split('-'); return `${d}/${m}/${y}`; };
-const esc = v => String(v||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-const line=(label,key,extra='')=>`<div class="pdf-label">${label}</div><div class="pdf-line ${extra}">${esc(value(key))}</div>`;
-const checks=(key,items)=>`<div class="pdf-checks">${items.map(item=>`<span>${item}${(value(key)||'').includes(item)?' ✓':''}</span>`).join('')}</div>`;
-function pageHeader(title = '', sub = '') {
-  return `<div class="pdf-header"><img class="pdf-logo-image" src="logo-genoma-vertical2.webp" alt="Genoma Sistema de Ensino" /></div>${title ? `<div class="pdf-title">${title}</div><div class="pdf-subtitle">${sub}</div>` : ''}`;
+const form = document.querySelector("#eventForm");
+const doc = document.querySelector("#pdfDocument");
+
+const getNodes = (key) => [...document.querySelectorAll(`[data-key="${key}"]`)];
+const value = (key) => {
+  const nodes = getNodes(key);
+  if (!nodes.length) return "";
+  if (nodes[0].type === "checkbox")
+    return nodes.filter((node) => node.checked).map((node) => node.value);
+  const selected = nodes.find((node) => node.checked);
+  return selected ? selected.value : nodes[0].value || "";
+};
+const values = (key) =>
+  Array.isArray(value(key)) ? value(key) : value(key) ? [value(key)] : [];
+const esc = (text) =>
+  String(text ?? "").replace(
+    /[&<>"']/g,
+    (char) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        char
+      ],
+  );
+const dateBR = (text) => {
+  if (!text) return "";
+  const [year, month, day] = text.split("-");
+  return `${day}/${month}/${year}`;
+};
+const checked = (key, item) => (values(key).includes(item) ? "✓" : "");
+const text = (key, className = "") =>
+  `<span class="overlay-text ${className}">${esc(value(key))}</span>`;
+const mark = (key, item, className = "") =>
+  `<span class="overlay-check ${className}">${checked(key, item)}</span>`;
+
+function page(number, contents) {
+  return `<section class="pdf-page page-${number}">${contents}</section>`;
 }
-function footer(n){return `<div class="pdf-footer">Rede Genoma Sistema de Ensino&nbsp; • &nbsp;Documento interno de gestão&nbsp; • &nbsp;Página ${n} de 3</div>`}
-function build(){
- const p1=`<section class="pdf-page">${pageHeader('SOLICITAÇÃO E AUTORIZAÇÃO DE EVENTO','Formulário Padrão – Rede Genoma')}<div class="pdf-grid"><div class="pdf-cell">Sede / unidade<b>${esc(value('sede'))}</b></div><div class="pdf-cell">Gestor responsável<b>${esc(value('gestor'))}</b></div><div class="pdf-cell">Data da solicitação<b>${esc(formatDate(value('dataSolicitacao')))}</b></div><div class="pdf-cell">Data prevista do evento<b>${esc(formatDate(value('dataEvento')))}</b></div></div><div class="pdf-section-title">1. DADOS DO EVENTO</div>${line('Nome do evento','nomeEvento')}${'<div class="pdf-label">Tipo de evento</div>'+checks('tipo',['Pedagógico','Institucional','Comemorativo','Esportivo','Cultural','Outro'])}${'<div class="pdf-label">Público-alvo</div>'+checks('publico',['Alunos','Famílias','Colaboradores','Comunidade','Outro'])}${line('Local de realização','local')}<div class="pdf-label">Horário previsto</div><div class="pdf-inline"><div>Início<div class="pdf-line">${esc(value('inicio'))}</div></div><div>Término<div class="pdf-line">${esc(value('termino'))}</div></div><div>Participantes<div class="pdf-line">${esc(value('participantes'))}</div></div></div><div class="pdf-section-title">2. JUSTIFICATIVA, OBJETIVO E PROGRAMAÇÃO</div>${line('Motivo / justificativa do evento','motivo','tall')}${line('Objetivo / Resultado esperado','objetivo','tall')}${line('Descrição do evento e programação prevista','programacao','x-tall')}${footer(1)}</section>`;
- const p2=`<section class="pdf-page">${pageHeader()}<div class="pdf-section-title">3. ESTRUTURA, CUSTOS E FORNECEDORES</div>${line('Estrutura, materiais, serviços e demais necessidades','estrutura','x-tall')}${line('Fornecedores / Prestadores previstos (se houver)','fornecedores','tall')}${line('Valor estimado total do evento','valor')}<div class="pdf-label">Orçamentos / documentos anexos</div>${checks('anexos',['Sim','Não','Não se aplica'])}<div class="pdf-section-title">4. SOLICITAÇÃO</div><p style="font-size:8px;line-height:1.4">Declaro que as informações acima são verdadeiras e que o evento somente será divulgado, contratado ou realizado após a autorização formal registrada neste documento.</p><div class="signature">Gestor da Unidade — Solicitante<br>Data: ${esc(formatDate(value('dataAssinatura')))||'____/____/____'}</div>${footer(2)}</section>`;
- const p3=`<section class="pdf-page">${pageHeader()}<div class="pdf-section-title">5. AUTORIZAÇÃO</div><div class="pdf-note">Nenhum evento que envolva despesas, contratação de fornecedores, utilização de estrutura externa ou compromissos financeiros em nome da Rede Genoma deverá ser confirmado, divulgado ou realizado antes da análise e autorização desta solicitação.</div>${checks('status',['AUTORIZADO','AUTORIZADO COM RESSALVAS','NÃO AUTORIZADO'])}${line('Ressalvas / Observações','ressalvas','x-tall')}<div style="text-align:right;margin-top:8mm">Data de autorização: ____/____/____</div><div class="signatures"><div><b>Rodrigo G. Ferreira Campos</b><br>Diretor de Eventos – Rede Genoma</div><div><b>Valquíria Fernandes</b><br>Gestora Financeira – Rede Genoma</div><div><b>Nilson Cunha</b><br>Maintenedor – Rede Genoma</div></div>${footer(3)}</section>`;
- doc.innerHTML=p1+p2+p3;
+
+function buildDocument() {
+  const p1 = page(
+    1,
+    `
+    ${text("sede", "p1-sede")}
+    ${text("gestor", "p1-gestor")}
+    <span class="overlay-text p1-data-solicitacao">${esc(dateBR(value("dataSolicitacao")))}</span>
+    <span class="overlay-text p1-data-evento">${esc(dateBR(value("dataEvento")))}</span>
+    ${text("nomeEvento", "p1-nome-evento")}
+    ${mark("tipo", "Pedagógico", "p1-tipo-1")}${mark("tipo", "Institucional", "p1-tipo-2")}${mark("tipo", "Comemorativo", "p1-tipo-3")}${mark("tipo", "Esportivo", "p1-tipo-4")}${mark("tipo", "Cultural", "p1-tipo-5")}${mark("tipo", "Outro", "p1-tipo-6")}
+    ${mark("publico", "Alunos", "p1-publico-1")}${mark("publico", "Famílias", "p1-publico-2")}${mark("publico", "Colaboradores", "p1-publico-3")}${mark("publico", "Comunidade", "p1-publico-4")}${mark("publico", "Outro", "p1-publico-5")}
+    ${text("local", "p1-local")}
+    ${text("inicio", "p1-inicio")}${text("termino", "p1-termino")}${text("participantes", "p1-participantes")}
+    ${text("motivo", "p1-motivo")}${text("objetivo", "p1-objetivo")}${text("programacao", "p1-programacao")}
+  `,
+  );
+
+  const p2 = page(
+    2,
+    `
+    ${text("estrutura", "p2-estrutura")}
+    ${text("fornecedores", "p2-fornecedores")}
+    ${text("valor", "p2-valor")}
+    ${mark("anexos", "Sim", "p2-anexos-1")}${mark("anexos", "Não", "p2-anexos-2")}${mark("anexos", "Não se aplica", "p2-anexos-3")}
+    <span class="overlay-text p2-data-assinatura">${esc(dateBR(value("dataAssinatura")))}</span>
+  `,
+  );
+
+  const p3 = page(
+    3,
+    `
+    ${mark("status", "AUTORIZADO", "p3-status-1")}${mark("status", "AUTORIZADO COM RESSALVAS", "p3-status-2")}${mark("status", "NÃO AUTORIZADO", "p3-status-3")}
+    ${text("ressalvas", "p3-ressalvas")}
+  `,
+  );
+
+  doc.innerHTML = p1 + p2 + p3;
 }
-form.addEventListener('input',build); form.addEventListener('change',build); build();
-document.querySelector('#themeToggle').addEventListener('click',()=>{document.body.classList.toggle('dark'); const dark=document.body.classList.contains('dark'); document.querySelector('#themeToggle').innerHTML=dark?'☀ <span>Modo claro</span>':'☾ <span>Modo escuro</span>'; localStorage.setItem('genoma-theme',dark?'dark':'light')});
-if(localStorage.getItem('genoma-theme')==='dark') document.querySelector('#themeToggle').click();
-async function generate(){build(); const button=document.querySelector('#generatePdf'); const old=button.innerHTML; button.disabled=true; button.innerHTML='Gerando PDF...'; const opt={margin:0,filename:`solicitacao-evento-${new Date().toISOString().slice(0,10)}.pdf`,image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true,letterRendering:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}; try{await html2pdf().set(opt).from(doc).save()}finally{button.disabled=false;button.innerHTML=old}}
-document.querySelector('#generatePdf').addEventListener('click',generate); document.querySelector('#generatePdfBottom').addEventListener('click',generate);
+
+form.addEventListener("input", buildDocument);
+form.addEventListener("change", buildDocument);
+buildDocument();
+
+const themeToggle = document.querySelector("#themeToggle");
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  const dark = document.body.classList.contains("dark");
+  themeToggle.innerHTML = dark
+    ? "☀ <span>Modo claro</span>"
+    : "☾ <span>Modo escuro</span>";
+  localStorage.setItem("genoma-theme", dark ? "dark" : "light");
+});
+if (localStorage.getItem("genoma-theme") === "dark") themeToggle.click();
+
+async function generate() {
+  buildDocument();
+  const button = document.querySelector("#generatePdf");
+  const bottomButton = document.querySelector("#generatePdfBottom");
+  const oldText = button.innerHTML;
+  button.disabled = true;
+  bottomButton.disabled = true;
+  button.innerHTML = "Gerando PDF...";
+
+  const options = {
+    margin: 0,
+    filename: `solicitacao-evento-${new Date().toISOString().slice(0, 10)}.pdf`,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      letterRendering: true,
+    },
+    jsPDF: {
+      unit: "mm",
+      format: "a4",
+      orientation: "portrait",
+      compress: true,
+    },
+    pagebreak: { mode: ["css"] },
+  };
+
+  try {
+    await html2pdf().set(options).from(doc).save();
+  } finally {
+    button.disabled = false;
+    bottomButton.disabled = false;
+    button.innerHTML = oldText;
+  }
+}
+
+document.querySelector("#generatePdf").addEventListener("click", generate);
+document
+  .querySelector("#generatePdfBottom")
+  .addEventListener("click", generate);

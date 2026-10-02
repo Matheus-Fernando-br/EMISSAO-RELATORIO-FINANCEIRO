@@ -51,3 +51,7 @@ A exportação usa `html2pdf.js` via CDN. Para uso sem internet, baixe a bibliot
 ## Logo oficial
 
 O arquivo `logo-genoma-vertical2.webp` deve ficar na raiz do projeto, no mesmo nível do `index.html`, `styles.css` e `script.js`. O site usa essa mesma imagem no cabeçalho e no PDF gerado.
+
+## Correção do PDF
+
+A geração agora usa as três páginas do modelo como fundos A4 fixos (`assets/modelo-1.png`, `assets/modelo-2.png` e `assets/modelo-3.png`) e sobrepõe os campos preenchidos. Isso evita quebra de página, reflow e criação de páginas extras.
